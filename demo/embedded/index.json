@@ -147,7 +147,10 @@
       "queryable": true,
       "type": "WMS",
       "visible": true,
-      "source": "etuna"
+      "source": "etuna",
+      "legendParams" : {
+        "legend_options" : "dpi:300"
+      }
   },
 
     {
