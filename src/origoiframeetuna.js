@@ -96,9 +96,8 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     name: 'origoiframeetuna',
     onInit() {
       window.addEventListener('message', event => {
-
         if (allowedOrigins) {
-          if (!(allowedOrigins.some(origin => origin === event.origin))) return;
+          if (!allowedOrigins.some(origin => origin === event.origin)) return;
         }
 
         const {command, targetLayer, ids, filter} = event.data;
