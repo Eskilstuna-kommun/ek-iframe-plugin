@@ -98,14 +98,14 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     if (ids.length === 0) {
       if (!homeWhenZero) return null;
       return startExtent;
-    } 
+    }
 
     return getFeatures(targetLayer, ids).then(featureArray => {
       const coordinateArray = featureArray.map(feature =>
         feature.getGeometry().getFirstCoordinate()
       );
       return boundingExtent(coordinateArray);
-    })
+    });
   }
 
   return Origo.ui.Component({
@@ -148,16 +148,15 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
           applyFiltering(targetLayer);
         } else if (command === 'panTo') {
           // command to pan to an array of features. If they do not fit inside the view then they do not fit inside the view.
-          const targetExtent = getExtent(ids, targetLayer)
+          const targetExtent = getExtent(ids, targetLayer);
           if (targetExtent === null) return;
-            viewer
-              .getMap()
-              .getView()
-              .setCenter(getCenter(targetExtent))
-
+          viewer
+            .getMap()
+            .getView()
+            .setCenter(getCenter(targetExtent));
         } else if (command === 'zoomTo') {
           // command to zoom to a an array of features
-          const targetExtent = getExtent(ids, targetLayer)
+          const targetExtent = getExtent(ids, targetLayer);
           if (targetExtent === null) return;
           viewer
             .getMap()
@@ -167,7 +166,6 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
               duration: zoomDuration,
               padding: [20, 20, 20, 20],
             });
-         
         } else {
           console.warn(
             'Received a message with an invalid command. Expected setFilter|setVisibleIDs|resetFilter|panTo|zoomTo.'
@@ -177,9 +175,9 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     },
     onAdd(evt) {
       viewer = evt.target;
-      const map = viewer.getMap()
-      startExtent = map.getView().calculateExtent(map.getSize())
-      
+      const map = viewer.getMap();
+      startExtent = map.getView().calculateExtent(map.getSize());
+
       // in case the layer gets added _after_ we have received a message
       viewer
         .getMap()
