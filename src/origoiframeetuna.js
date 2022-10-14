@@ -94,18 +94,17 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     );
   }
 
-  function getExtent(ids, targetLayer) {
+  async function getExtent(ids, targetLayer) {
     if (ids.length === 0) {
       if (!homeWhenZero) return null;
       return startExtent;
     }
 
-    return getFeatures(targetLayer, ids).then(featureArray => {
-      const coordinateArray = featureArray.map(feature =>
-        feature.getGeometry().getFirstCoordinate()
-      );
-      return boundingExtent(coordinateArray);
-    });
+    const featureArray = await getFeatures(targetLayer, ids);
+    const coordinateArray = featureArray.map(feature => feature.getGeometry().getFirstCoordinate());
+    const extent = boundingExtent(coordinateArray);
+
+    return extent;
   }
 
   return Origo.ui.Component({
@@ -148,24 +147,29 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
           applyFiltering(targetLayer);
         } else if (command === 'panTo') {
           // command to pan to an array of features. If they do not fit inside the view then they do not fit inside the view.
-          const targetExtent = getExtent(ids, targetLayer);
-          if (targetExtent === null) return;
-          viewer
-            .getMap()
-            .getView()
-            .setCenter(getCenter(targetExtent));
+          getExtent(ids, targetLayer).then(extent => {
+            if (!(extent === null)) {
+              viewer
+                .getMap()
+                .getView()
+                .setCenter(getCenter(extent));
+            }
+          });
         } else if (command === 'zoomTo') {
           // command to zoom to a an array of features
-          const targetExtent = getExtent(ids, targetLayer);
-          if (targetExtent === null) return;
-          viewer
-            .getMap()
-            .getView()
-            .fit(targetExtent, {
-              maxZoom,
-              duration: zoomDuration,
-              padding: [20, 20, 20, 20],
-            });
+
+          getExtent(ids, targetLayer).then(extent => {
+            if (!(extent === null)) {
+              viewer
+                .getMap()
+                .getView()
+                .fit(extent, {
+                  maxZoom,
+                  duration: zoomDuration,
+                  padding: [20, 20, 20, 20],
+                });
+            }
+          });
         } else {
           console.warn(
             'Received a message with an invalid command. Expected setFilter|setVisibleIDs|resetFilter|panTo|zoomTo.'
