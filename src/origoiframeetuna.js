@@ -6,9 +6,10 @@ import {boundingExtent, getCenter} from 'ol/extent';
  * @param {{ layerIDField: string, maxZoom: number=, zoomDuration: number= }} options
  */
 const Origoiframeetuna = function Origoiframeetuna(options = {}) {
-  const {layerIDField, maxZoom, zoomDuration, allowedOrigins} = options;
+  const {layerIDField, maxZoom, zoomDuration, allowedOrigins, homeWhenZero = false} = options;
 
   let viewer;
+  let startExtent;
 
   /** @type string|undefined */
   let cqlFilter;
@@ -93,6 +94,19 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     );
   }
 
+  async function getExtent(ids, targetLayer) {
+    if (ids.length === 0) {
+      if (!homeWhenZero) return null;
+      return startExtent;
+    }
+
+    const featureArray = await getFeatures(targetLayer, ids);
+    const coordinateArray = featureArray.map(feature => feature.getGeometry().getFirstCoordinate());
+    const extent = boundingExtent(coordinateArray);
+
+    return extent;
+  }
+
   return Origo.ui.Component({
     name: 'origoiframeetuna',
     onInit() {
@@ -133,29 +147,28 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
           applyFiltering(targetLayer);
         } else if (command === 'panTo') {
           // command to pan to an array of features. If they do not fit inside the view then they do not fit inside the view.
-          getFeatures(targetLayer, ids).then(featureArray => {
-            const coordinateArray = featureArray.map(feature =>
-              feature.getGeometry().getFirstCoordinate()
-            );
-            viewer
-              .getMap()
-              .getView()
-              .setCenter(getCenter(boundingExtent(coordinateArray)));
+          getExtent(ids, targetLayer).then(extent => {
+            if (!(extent === null)) {
+              viewer
+                .getMap()
+                .getView()
+                .setCenter(getCenter(extent));
+            }
           });
         } else if (command === 'zoomTo') {
           // command to zoom to a an array of features
-          getFeatures(targetLayer, ids).then(featureArray => {
-            const coordinateArray = featureArray.map(feature =>
-              feature.getGeometry().getFirstCoordinate()
-            );
-            viewer
-              .getMap()
-              .getView()
-              .fit(boundingExtent(coordinateArray), {
-                maxZoom,
-                duration: zoomDuration,
-                padding: [20, 20, 20, 20],
-              });
+
+          getExtent(ids, targetLayer).then(extent => {
+            if (!(extent === null)) {
+              viewer
+                .getMap()
+                .getView()
+                .fit(extent, {
+                  maxZoom,
+                  duration: zoomDuration,
+                  padding: [20, 20, 20, 20],
+                });
+            }
           });
         } else {
           console.warn(
@@ -166,6 +179,8 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     },
     onAdd(evt) {
       viewer = evt.target;
+      const map = viewer.getMap();
+      startExtent = map.getView().calculateExtent(map.getSize());
 
       // in case the layer gets added _after_ we have received a message
       viewer
