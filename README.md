@@ -8,6 +8,7 @@ Ger ett API för att styra delar av Origo inuti en `<iframe>` via https://develo
 - `maxZoom`: Maximal inzoomningsnivå. **Valfri**.
 - `zoomDuration`: Tid (i millisekunder) för att genomföra en zoomning. **Valfri**.
 - `allowedOrigins`: En array med strängar för tillåtna ursprung att acceptera meddelanden från. **Valfri**
+- `homeWhenZero`: En boolesk variabel för huruvida kartan ska panorera eller zooma till start-position när ett meddelande med kommandona 'zoomTo' eller 'panTo' inkommer med en tom 'ids'-array. Defaultvärde är `false`. **Valfri**
 
 ### Meddelanden
 

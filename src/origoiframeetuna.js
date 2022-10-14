@@ -6,9 +6,10 @@ import {boundingExtent, getCenter} from 'ol/extent';
  * @param {{ layerIDField: string, maxZoom: number=, zoomDuration: number= }} options
  */
 const Origoiframeetuna = function Origoiframeetuna(options = {}) {
-  const {layerIDField, maxZoom, zoomDuration, allowedOrigins} = options;
+  const {layerIDField, maxZoom, zoomDuration, allowedOrigins, homeWhenZero = false} = options;
 
   let viewer;
+  let startExtent;
 
   /** @type string|undefined */
   let cqlFilter;
@@ -93,6 +94,20 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     );
   }
 
+  function getExtent(ids, targetLayer) {
+    if (ids.length === 0) {
+      if (!homeWhenZero) return null;
+      return startExtent;
+    } 
+
+    return getFeatures(targetLayer, ids).then(featureArray => {
+      const coordinateArray = featureArray.map(feature =>
+        feature.getGeometry().getFirstCoordinate()
+      );
+      return boundingExtent(coordinateArray);
+    })
+  }
+
   return Origo.ui.Component({
     name: 'origoiframeetuna',
     onInit() {
@@ -133,30 +148,26 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
           applyFiltering(targetLayer);
         } else if (command === 'panTo') {
           // command to pan to an array of features. If they do not fit inside the view then they do not fit inside the view.
-          getFeatures(targetLayer, ids).then(featureArray => {
-            const coordinateArray = featureArray.map(feature =>
-              feature.getGeometry().getFirstCoordinate()
-            );
+          const targetExtent = getExtent(ids, targetLayer)
+          if (targetExtent === null) return;
             viewer
               .getMap()
               .getView()
-              .setCenter(getCenter(boundingExtent(coordinateArray)));
-          });
+              .setCenter(getCenter(targetExtent))
+
         } else if (command === 'zoomTo') {
           // command to zoom to a an array of features
-          getFeatures(targetLayer, ids).then(featureArray => {
-            const coordinateArray = featureArray.map(feature =>
-              feature.getGeometry().getFirstCoordinate()
-            );
-            viewer
-              .getMap()
-              .getView()
-              .fit(boundingExtent(coordinateArray), {
-                maxZoom,
-                duration: zoomDuration,
-                padding: [20, 20, 20, 20],
-              });
-          });
+          const targetExtent = getExtent(ids, targetLayer)
+          if (targetExtent === null) return;
+          viewer
+            .getMap()
+            .getView()
+            .fit(targetExtent, {
+              maxZoom,
+              duration: zoomDuration,
+              padding: [20, 20, 20, 20],
+            });
+         
         } else {
           console.warn(
             'Received a message with an invalid command. Expected setFilter|setVisibleIDs|resetFilter|panTo|zoomTo.'
@@ -166,7 +177,9 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     },
     onAdd(evt) {
       viewer = evt.target;
-
+      const map = viewer.getMap()
+      startExtent = map.getView().calculateExtent(map.getSize())
+      
       // in case the layer gets added _after_ we have received a message
       viewer
         .getMap()
