@@ -74,7 +74,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
       url.pathname = url.pathname.replace('wms', 'wfs');
       return getFeaturesFromWFS(targetLayer, url, ids);
     }
-    /*  
+    /*  experimental
     if (layer.get('type') === 'WFS') {
       // warning: code path not tested
       // best case - we already have the feature
@@ -183,14 +183,15 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
       startExtent = map.getView().calculateExtent(map.getSize());
 
       // in case the layer gets added _after_ we have received a message
-      viewer
+     // experimental
+    /*  viewer
         .getMap()
         .getLayers()
         .on('add', async ({element}) => {
           if (element.get('name')) {
             applyFiltering();
           }
-        });
+        }); */
     },
     render() {
       // no-op
