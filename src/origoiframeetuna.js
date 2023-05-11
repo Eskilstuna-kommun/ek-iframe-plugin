@@ -1,13 +1,15 @@
 import Origo from 'Origo';
-import {boundingExtent, getCenter} from 'ol/extent';
+import { boundingExtent, getCenter } from 'ol/extent';
 
-const {GeoJSON} = Origo.ol.format;
+const { GeoJSON } = Origo.ol.format;
 
 /**
  * @param {{ layerIDField: string, maxZoom: number=, zoomDuration: number= }} options
  */
 const Origoiframeetuna = function Origoiframeetuna(options = {}) {
-  const {layerIDField, maxZoom, zoomDuration, allowedOrigins, homeWhenZero = false} = options;
+  const {
+    layerIDField, maxZoom, zoomDuration, allowedOrigins, homeWhenZero = false
+  } = options;
 
   let viewer;
   let startExtent;
@@ -21,7 +23,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
   function applyFiltering(targetLayer) {
     const layer = viewer.getLayer(targetLayer);
     if (layer.get('type') === 'WMS') {
-      layer.getSource().updateParams({CQL_FILTER: cqlFilter});
+      layer.getSource().updateParams({ CQL_FILTER: cqlFilter });
     } else {
       console.warn('Layer of type', layer.get('type'), 'is not supported for iframe filtering');
     }
@@ -35,7 +37,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
    */
   function getFilterIds(ids) {
     if (ids.length === 0) return "''";
-    const newArray = ids.map(id => `'${id}'`);
+    const newArray = ids.map((id) => `'${id}'`);
     return newArray.join();
   }
 
@@ -55,8 +57,8 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     url.searchParams.set('cql_filter', `${layerIDField} in (${getFilterIds(ids)})`);
 
     return fetch(url.toString())
-      .then(res => res.json())
-      .then(data => new GeoJSON().readFeatures(data));
+      .then((res) => res.json())
+      .then((data) => new GeoJSON().readFeatures(data));
   }
 
   /**
@@ -102,7 +104,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     }
 
     const featureArray = await getFeatures(targetLayer, ids);
-    const coordinateArray = featureArray.map(feature => feature.getGeometry().getFirstCoordinate());
+    const coordinateArray = featureArray.map((feature) => feature.getGeometry().getFirstCoordinate());
     const extent = boundingExtent(coordinateArray);
 
     return extent;
@@ -111,12 +113,14 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
   return Origo.ui.Component({
     name: 'origoiframeetuna',
     onInit() {
-      window.addEventListener('message', event => {
+      window.addEventListener('message', (event) => {
         if (allowedOrigins) {
-          if (!allowedOrigins.some(origin => origin === event.origin)) return;
+          if (!allowedOrigins.some((origin) => origin === event.origin)) return;
         }
 
-        const {command, targetLayer, ids, filter} = event.data;
+        const {
+          command, targetLayer, ids, filter
+        } = event.data;
         if (!command || !targetLayer) {
           console.warn(
             'An object with a command, targetLayer as well as either ids or filter property is required.'
@@ -148,7 +152,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
           applyFiltering(targetLayer);
         } else if (command === 'panTo') {
           // command to pan to an array of features. If they do not fit inside the view then they do not fit inside the view.
-          getExtent(ids, targetLayer).then(extent => {
+          getExtent(ids, targetLayer).then((extent) => {
             if (!(extent === null)) {
               viewer
                 .getMap()
@@ -159,7 +163,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
         } else if (command === 'zoomTo') {
           // command to zoom to a an array of features
 
-          getExtent(ids, targetLayer).then(extent => {
+          getExtent(ids, targetLayer).then((extent) => {
             if (!(extent === null)) {
               viewer
                 .getMap()
@@ -167,7 +171,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
                 .fit(extent, {
                   maxZoom,
                   duration: zoomDuration,
-                  padding: [20, 20, 20, 20],
+                  padding: [20, 20, 20, 20]
                 });
             }
           });
@@ -184,7 +188,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
       startExtent = map.getView().calculateExtent(map.getSize());
 
       // in case the layer gets added _after_ we have received a message
-     // experimental
+      // experimental
     /*  viewer
         .getMap()
         .getLayers()
@@ -196,7 +200,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     },
     render() {
       // no-op
-    },
+    }
   });
 };
 
