@@ -1,6 +1,7 @@
 import Origo from 'Origo';
-import GeoJSON from 'ol/format/GeoJSON';
 import {boundingExtent, getCenter} from 'ol/extent';
+
+const {GeoJSON} = Origo.ol.format;
 
 /**
  * @param {{ layerIDField: string, maxZoom: number=, zoomDuration: number= }} options
