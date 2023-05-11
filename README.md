@@ -56,7 +56,7 @@ const zoomToMessage = {
 
 ### Utveckling
 
-1. Clona Origo och detta repo
+1. Klona Origo och detta repo
 2. Kör `npm install` i båda repon
 3. Kör `npm start` i båda repon
 4. Öppna `http://localhost:9001/demo/` i en webbläsare
@@ -70,7 +70,7 @@ const zoomToMessage = {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization'
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
     },
 ```
 )
