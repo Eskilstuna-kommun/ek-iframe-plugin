@@ -59,7 +59,7 @@ const zoomToMessage = {
 1. Clona Origo och detta repo
 2. Kör `npm install` i båda repon
 3. Kör `npm start` i båda repon
-4. Öppna `https://localhost:9001/demo/` i en webbläsare
+4. Öppna `http://localhost:9001/demo/` i en webbläsare
 
 (om CORS-fel så kan något som följande behövas i Origos tasks/webpack.dev.js:
 ```javascript
@@ -68,9 +68,9 @@ const zoomToMessage = {
       directory: './'
     },
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-      "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization'
     },
 ```
 )
