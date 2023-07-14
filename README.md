@@ -9,6 +9,7 @@ Ger ett API för att styra delar av Origo inuti en `<iframe>` via https://develo
 - `zoomDuration`: Tid (i millisekunder) för att genomföra en zoomning. **Valfri**.
 - `allowedOrigins`: En array med strängar för tillåtna ursprung att acceptera meddelanden från. **Valfri**
 - `homeWhenZero`: En boolesk variabel för huruvida kartan ska panorera eller zooma till start-position när ett meddelande med kommandona 'zoomTo' eller 'panTo' inkommer med en tom 'ids'-array. Defaultvärde är `false`. **Valfri**
+- `baseUrl` : En sträng för kartserverns protokoll och domän. Kan användas om kartlagers källor anges med relativ sökväg ex '/geoserver/workspace/ows'. **Valfri**
 
 ### Meddelanden
 
@@ -47,7 +48,8 @@ const zoomToMessage = {
           layerIDField: "globalId",
           maxZoom: 11,
           zoomDuration: 750,
-          allowedOrigins: ["http://localhost:9001", "https://www.somedomain.net"]
+          allowedOrigins: ["http://localhost:9001", "https://www.somedomain.net"],
+          baseUrl: "https://megamegamapserver.certainly.net"
       });
       viewer.addComponent(origoiframeetuna);
     });

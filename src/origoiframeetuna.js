@@ -4,11 +4,11 @@ import { boundingExtent, getCenter } from 'ol/extent';
 const { GeoJSON } = Origo.ol.format;
 
 /**
- * @param {{ layerIDField: string, maxZoom: number=, zoomDuration: number= }} options
+ * @param {{ layerIDField: string, maxZoom: number, zoomDuration: number, homeWhenZero: boolean, baseUrl: string }} options
  */
 const Origoiframeetuna = function Origoiframeetuna(options = {}) {
   const {
-    layerIDField, maxZoom, zoomDuration, allowedOrigins, homeWhenZero = false
+    layerIDField, maxZoom, zoomDuration, allowedOrigins, homeWhenZero = false, baseUrl
   } = options;
 
   let viewer;
@@ -71,9 +71,14 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     if (layer.get('type') === 'WMS') {
       // this works for geoserver, but might not for others
       const source = layer.getSource();
-      const url = new URL(
-        typeof source.getUrl === 'function' ? source.getUrl() : source.getUrls()[0]
-      );
+      let urlString = source.getUrl === 'function' ? source.getUrl() : source.getUrls()[0];
+      // if source url does not appear absolute then use the baseUrl param if available
+      // else try to ascertain the current location origin/domain
+      if (!urlString.startsWith('http')) {
+        if (baseUrl) urlString = baseUrl.concat(urlString);
+        else urlString = window.location.origin.concat(urlString);
+      }
+      const url = new URL(urlString);
       url.pathname = url.pathname.replace('wms', 'wfs');
       return getFeaturesFromWFS(targetLayer, url, ids);
     }
