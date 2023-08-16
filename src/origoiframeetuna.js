@@ -4,7 +4,13 @@ import { boundingExtent, getCenter } from 'ol/extent';
 const { GeoJSON } = Origo.ol.format;
 
 /**
- * @param {{ layerIDField: string, maxZoom: number, zoomDuration: number, homeWhenZero: boolean, baseUrl: string }} options
+ * Init the iframe plugin
+ * @param {Object} options - object with plugin optional and required params
+ * @param {string} options.layerIDField - unique id column of employed layer
+ * @param {Number} [options.zoomDuration] - millisecond duration of zoom animation
+ * @param {string[]} [options.allowedOrigins] - array of strings of allowed origins to receive messages from
+ * @param {boolean} [options.homeWhenZero] - whether the map should zoom to home if message received with empty list of ids
+ * @param {string} [options.baseUrl] - a string indicating the map server's protocol and domain, employed in case of relative sources
  */
 const Origoiframeetuna = function Origoiframeetuna(options = {}) {
   const {
