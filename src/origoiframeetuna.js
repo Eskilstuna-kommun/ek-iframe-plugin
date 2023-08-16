@@ -18,11 +18,56 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
   let cqlFilter;
 
   /**
+   * HTTP POST for WMS getMap via custom image/tileLoadFunction to avoid too long cql filter urls
+   */
+  async function imageLoadFunction(loadedImage, src) {
+    const url = new URL(src.split('?')[0]);
+    let objectUrl;
+    const img = loadedImage.getImage();
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    const WMSOptions = {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/x-www-form-urlencoded'
+      },
+      body: src.split('?')[1]
+    };
+    const response = await fetch(url, WMSOptions);
+    if (response.ok) {
+      const blob = await response.blob();
+      objectUrl = URL.createObjectURL(blob);
+      img.src = objectUrl;
+    }
+  }
+  /**
+   * If source url does not appear absolute then use the baseUrl param if available
+   * else try to ascertain the current location origin/domain
+  */
+  function getAbsoluteSourceURL(src) {
+    let urlString = src.getUrl === 'function' ? src.getUrl() : src.getUrls()[0];
+
+    if (!urlString.startsWith('http')) {
+      if (baseUrl) urlString = baseUrl.concat(urlString);
+      else urlString = window.location.origin.concat(urlString);
+    }
+    return urlString;
+  }
+
+  /**
    * Apply the current filter (from `cqlFilter`) to the layer
    */
   function applyFiltering(targetLayer) {
     const layer = viewer.getLayer(targetLayer);
     if (layer.get('type') === 'WMS') {
+      const WMSSource = layer.getSource();
+      WMSSource.setUrl(getAbsoluteSourceURL(WMSSource));
+
+      if (WMSSource.imageLoadFunction) WMSSource.setImageLoadFunction(imageLoadFunction);
+      else if (WMSSource.tileLoadFunction) WMSSource.setTileLoadFunction(imageLoadFunction);
       layer.getSource().updateParams({ CQL_FILTER: cqlFilter });
     } else {
       console.warn('Layer of type', layer.get('type'), 'is not supported for iframe filtering');
@@ -48,17 +93,23 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
    * @param {String[]} ids
    * @returns {Promise<import("ol/Feature").default[]>}
    */
-  function getFeaturesFromWFS(targetLayer, url, ids) {
-    url.searchParams.set('service', 'WFS');
-    url.searchParams.set('version', '1.1.1');
-    url.searchParams.set('request', 'GetFeature');
-    url.searchParams.set('outputFormat', 'application/json');
-    url.searchParams.set('typeNames', targetLayer);
-    url.searchParams.set('cql_filter', `${layerIDField} in (${getFilterIds(ids)})`);
+  async function getFeaturesFromWFS(targetLayer, url, ids) {
+    const body = new URLSearchParams();
+    body.set('service', 'WFS');
+    body.set('version', '1.1.1');
+    body.set('request', 'GetFeature');
+    body.set('outputFormat', 'application/json');
+    body.set('typeNames', targetLayer);
+    body.set('cql_filter', `${layerIDField} in (${getFilterIds(ids)})`);
 
-    return fetch(url.toString())
-      .then((res) => res.json())
-      .then((data) => new GeoJSON().readFeatures(data));
+    const WFSOptions = {
+      method: 'POST',
+      body
+    };
+
+    const result = await fetch(url.toString(), WFSOptions);
+    const JSONresult = await result.json();
+    return new GeoJSON().readFeatures(JSONresult);
   }
 
   /**
@@ -71,13 +122,7 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     if (layer.get('type') === 'WMS') {
       // this works for geoserver, but might not for others
       const source = layer.getSource();
-      let urlString = source.getUrl === 'function' ? source.getUrl() : source.getUrls()[0];
-      // if source url does not appear absolute then use the baseUrl param if available
-      // else try to ascertain the current location origin/domain
-      if (!urlString.startsWith('http')) {
-        if (baseUrl) urlString = baseUrl.concat(urlString);
-        else urlString = window.location.origin.concat(urlString);
-      }
+      const urlString = getAbsoluteSourceURL(source);
       const url = new URL(urlString);
       url.pathname = url.pathname.replace('wms', 'wfs');
       return getFeaturesFromWFS(targetLayer, url, ids);
