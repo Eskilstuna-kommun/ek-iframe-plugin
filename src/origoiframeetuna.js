@@ -160,10 +160,9 @@ const Origoiframeetuna = function Origoiframeetuna(options = {}) {
     }
 
     const featureArray = await getFeatures(targetLayer, ids);
-    const coordinateArray = featureArray.map((feature) => feature.getGeometry().getFirstCoordinate());
-    const extent = boundingExtent(coordinateArray);
-
-    return extent;
+    const extents = featureArray.map((feature) => feature.getGeometry().getExtent());
+    if (extents.length > 1) return boundingExtent(extents);
+    return extents[0];
   }
 
   return Origo.ui.Component({
