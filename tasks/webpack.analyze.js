@@ -1,6 +1,6 @@
 const merge = require('webpack-merge');
 const CompressionPlugin = require('compression-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const prod = require('./webpack.prod.js');
 
 module.exports = merge(prod, {

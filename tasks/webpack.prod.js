@@ -5,8 +5,7 @@ const common = require('./webpack.common.js');
 module.exports = merge(common, {
   optimization: {
     nodeEnv: 'production',
-    minimize: true,
-    
+    minimize: true
   },
   performance: {
     hints: false

@@ -1,4 +1,4 @@
-const path = require("path");
+const path = require('path');
 
 module.exports = {
   entry: [
@@ -14,7 +14,7 @@ module.exports = {
   resolve: {
     extensions: ['*', '.js', '.scss'],
     alias: {
-      'Origo$': path.resolve(__dirname, "../../origo/origo.js")
+      Origo$: path.resolve(__dirname, '../../origo/origo.js')
     }
   }
 };

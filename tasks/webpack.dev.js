@@ -21,8 +21,7 @@ module.exports = merge(common, {
       //mimeTypes: { 'text/html': ['phtml'] },
       //publicPath: '/publicPathForDevServe',
       //serverSideRender: true,
-      writeToDisk: true,
-    },
-    
+      writeToDisk: true
+    }
   }
 });
